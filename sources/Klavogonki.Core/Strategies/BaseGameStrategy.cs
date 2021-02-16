@@ -81,12 +81,14 @@ namespace Klavogonki.Core.Strategies
             var howtoplayPanel = WebDriver.FindElement(By.Id("howtoplay"));
             if (howtoplayPanel.Displayed)
             {
-                var checkBox = WebDriver.FindElement(By.Id("chk-howtoplay"));
+                var checkBox = howtoplayPanel.FindElement(By.Id("chk-howtoplay"));
                 checkBox?.Click();
 
-                var button = WebDriver.FindElement(By.XPath("//*[@id=\"howtoplay\"]/div[2]/div/table/tbody/tr[2]/td[2]/p[5]/input"));
+                var button = howtoplayPanel.FindElement(By.XPath(".//input[@type='button']"));
                 button?.Click();
             }
+
+            Thread.Sleep(TimeSpan.FromSeconds(1));
 
             var startButton = WebDriver.FindElement(By.Id("host_start"));
             if (startButton.Displayed)
