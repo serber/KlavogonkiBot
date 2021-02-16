@@ -174,7 +174,7 @@ namespace Klavogonki.Core.Strategies
                 {
                     Logger.LogInformation($"Game will start in {waitingTime}");
 
-                    return waitingTime;
+                    return waitingTime.Add(TimeSpan.FromSeconds(30));
                 }
             }
 
