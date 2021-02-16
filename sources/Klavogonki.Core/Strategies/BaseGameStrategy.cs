@@ -90,7 +90,8 @@ namespace Klavogonki.Core.Strategies
 
             Thread.Sleep(TimeSpan.FromSeconds(1));
 
-            var startButton = WebDriver.FindElement(By.Id("host_start"));
+            var wait = new WebDriverWait(WebDriver, TimeSpan.FromSeconds(5));
+            var startButton = wait.Until(driver => driver.FindElement(By.Id("host_start")));
             if (startButton.Displayed)
             {
                 startButton.Click();
@@ -98,7 +99,7 @@ namespace Klavogonki.Core.Strategies
 
             Thread.Sleep(TimeSpan.FromSeconds(5));
 
-            var wait = new WebDriverWait(WebDriver, GetWaitingTime());
+            wait = new WebDriverWait(WebDriver, GetWaitingTime());
             wait.Until(ExpectedConditions.ElementIsEnabled(By.Id("inputtext")));
         }
 
