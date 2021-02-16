@@ -16,9 +16,9 @@ namespace Klavogonki.Core.Strategies
     /// </summary>
     public class CompetitionGameStrategy : BaseGameStrategy
     {
-        public CompetitionGameStrategy(IWebDriver webDriver, ITextExtractor textExtractor,
+        public CompetitionGameStrategy(IWebDriver webDriver, ITextExtractor textExtractor, IDelayCalculator delayCalculator,
             IAuthenticationService authenticationService, IOptions<GameOptions> options,
-            ILogger<CompetitionGameStrategy> logger) : base(webDriver, authenticationService, textExtractor, options, logger)
+            ILogger<CompetitionGameStrategy> logger) : base(webDriver, authenticationService, textExtractor, delayCalculator, options, logger)
         {
         }
 

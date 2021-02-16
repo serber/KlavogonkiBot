@@ -1,4 +1,4 @@
-﻿namespace Klavogonki.Core.Runner
+﻿namespace Klavogonki.Common
 {
     /// <summary>
     /// Service for launching a series of games

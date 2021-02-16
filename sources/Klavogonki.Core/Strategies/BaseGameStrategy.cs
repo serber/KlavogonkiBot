@@ -18,6 +18,8 @@ namespace Klavogonki.Core.Strategies
 
         private readonly ITextExtractor _textExtractor;
 
+        private readonly IDelayCalculator _delayCalculator;
+
         private readonly GameOptions _options;
 
         protected readonly IWebDriver WebDriver;
@@ -26,10 +28,11 @@ namespace Klavogonki.Core.Strategies
 
         private bool _authenticated;
 
-        protected BaseGameStrategy(IWebDriver webDriver, IAuthenticationService authenticationService, ITextExtractor textExtractor, IOptions<GameOptions> options, ILogger logger)
+        protected BaseGameStrategy(IWebDriver webDriver, IAuthenticationService authenticationService, ITextExtractor textExtractor, IDelayCalculator delayCalculator, IOptions<GameOptions> options, ILogger logger)
         {
             _authenticationService = authenticationService;
             _textExtractor = textExtractor;
+            _delayCalculator = delayCalculator;
             _options = options.Value;
 
             WebDriver = webDriver;
@@ -115,13 +118,17 @@ namespace Klavogonki.Core.Strategies
 
                 Logger.LogInformation($"Text found: {text}");
 
+                var delay = _delayCalculator.Calculate(text, _options.Speed);
+
+                Logger.LogInformation($"Speed: {_options.Speed}, delay: {delay}");
+
                 var parts = text.Split(' ');
                 foreach (var part in parts)
                 {
                     foreach (var c in part)
                     {
                         input.SendKeys($"{c}");
-                        Thread.Sleep(TimeSpan.FromMilliseconds(_options.Delay));
+                        Thread.Sleep(TimeSpan.FromMilliseconds(delay));
                     }
 
                     var csssAttribute = input.GetAttribute("class");
@@ -133,7 +140,7 @@ namespace Klavogonki.Core.Strategies
                     }
 
                     input.SendKeys(" ");
-                    Thread.Sleep(TimeSpan.FromMilliseconds(_options.Delay * 2));
+                    Thread.Sleep(TimeSpan.FromMilliseconds(delay));
                 }
 
                 return true;

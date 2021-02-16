@@ -33,9 +33,10 @@ namespace Klavogonki.App
                 .Configure<GameRunnerOptions>(configuration.GetSection(nameof(GameRunnerOptions)).Bind)
                 .AddSingleton<IGameRunner, GameRunner>()
                 .AddSingleton<ITextExtractor, TextExtractor>()
+                .AddSingleton<IDelayCalculator, AverageDelayCalculator>()
                 //.AddScoped<IGameStrategy, RandomGameStrategy>()
-                .AddScoped<IGameStrategy, CompetitionGameStrategy>()
-                //.AddScoped<IGameStrategy, CustomGameStrategy>()
+                //.AddScoped<IGameStrategy, CompetitionGameStrategy>()
+                .AddScoped<IGameStrategy, CustomGameStrategy>()
                 .AddScoped<IAuthenticationService, LoginPasswordAuthenticationService>()
                 .AddScoped<IWebDriver>(provider => new ChromeDriver())
                 .BuildServiceProvider();
