@@ -129,8 +129,10 @@ namespace Klavogonki.Core.Strategies
                 
                 foreach (var entry in inputMaps)
                 {
-                    if (entry.ErrorSymbols.Length > 0)
+                    var shouldTypo = entry.ErrorSymbols.Length > 0;
+                    if (shouldTypo)
                     {
+                        //  Some typos
                         foreach (var errorSymbol in entry.ErrorSymbols)
                         {
                             input.SendKeys($"{errorSymbol}");
@@ -148,12 +150,16 @@ namespace Klavogonki.Core.Strategies
                     input.SendKeys($"{entry.Symbol}");
                     Thread.Sleep(entry.Delay);
 
-                    var csssAttribute = input.GetAttribute("class");
-                    if (csssAttribute != null && csssAttribute.Contains("error"))
+                    if (!shouldTypo)
                     {
-                        Logger.LogError("Error in input found");
+                        //  Don't check error attribute when typo
+                        var csssAttribute = input.GetAttribute("class");
+                        if (csssAttribute != null && csssAttribute.Contains("error"))
+                        {
+                            Logger.LogError("Error in input found");
 
-                        return false;
+                            return false;
+                        }
                     }
                 }
 
