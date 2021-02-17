@@ -12,9 +12,9 @@ namespace Klavogonki.Core.Strategies
     /// </summary>
     public class RandomGameStrategy : BaseGameStrategy
     {
-        public RandomGameStrategy(IWebDriver webDriver, IAuthenticationService authenticationService,
+        public RandomGameStrategy(IWebDriver webDriver, IAuthenticationService authenticationService, IDelayCalculator delayCalculator,
             ITextExtractor textExtractor, IOptions<GameOptions> options, ILogger<RandomGameStrategy> logger)
-            : base(webDriver, authenticationService, textExtractor, options, logger)
+            : base(webDriver, authenticationService, textExtractor, delayCalculator, options, logger)
         {
         }
 

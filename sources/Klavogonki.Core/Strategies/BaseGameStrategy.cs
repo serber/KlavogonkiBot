@@ -18,6 +18,8 @@ namespace Klavogonki.Core.Strategies
 
         private readonly ITextExtractor _textExtractor;
 
+        private readonly IDelayCalculator _delayCalculator;
+
         private readonly GameOptions _options;
 
         protected readonly IWebDriver WebDriver;
@@ -26,10 +28,11 @@ namespace Klavogonki.Core.Strategies
 
         private bool _authenticated;
 
-        protected BaseGameStrategy(IWebDriver webDriver, IAuthenticationService authenticationService, ITextExtractor textExtractor, IOptions<GameOptions> options, ILogger logger)
+        protected BaseGameStrategy(IWebDriver webDriver, IAuthenticationService authenticationService, ITextExtractor textExtractor, IDelayCalculator delayCalculator, IOptions<GameOptions> options, ILogger logger)
         {
             _authenticationService = authenticationService;
             _textExtractor = textExtractor;
+            _delayCalculator = delayCalculator;
             _options = options.Value;
 
             WebDriver = webDriver;
@@ -78,14 +81,17 @@ namespace Klavogonki.Core.Strategies
             var howtoplayPanel = WebDriver.FindElement(By.Id("howtoplay"));
             if (howtoplayPanel.Displayed)
             {
-                var checkBox = WebDriver.FindElement(By.Id("chk-howtoplay"));
+                var checkBox = howtoplayPanel.FindElement(By.Id("chk-howtoplay"));
                 checkBox?.Click();
 
-                var button = WebDriver.FindElement(By.XPath("//*[@id=\"howtoplay\"]/div[2]/div/table/tbody/tr[2]/td[2]/p[5]/input"));
+                var button = howtoplayPanel.FindElement(By.XPath(".//input[@type='button']"));
                 button?.Click();
             }
 
-            var startButton = WebDriver.FindElement(By.Id("host_start"));
+            Thread.Sleep(TimeSpan.FromSeconds(1));
+
+            var wait = new WebDriverWait(WebDriver, TimeSpan.FromSeconds(5));
+            var startButton = wait.Until(driver => driver.FindElement(By.Id("host_start")));
             if (startButton.Displayed)
             {
                 startButton.Click();
@@ -93,7 +99,7 @@ namespace Klavogonki.Core.Strategies
 
             Thread.Sleep(TimeSpan.FromSeconds(5));
 
-            var wait = new WebDriverWait(WebDriver, GetWaitingTime());
+            wait = new WebDriverWait(WebDriver, GetWaitingTime());
             wait.Until(ExpectedConditions.ElementIsEnabled(By.Id("inputtext")));
         }
 
@@ -115,13 +121,17 @@ namespace Klavogonki.Core.Strategies
 
                 Logger.LogInformation($"Text found: {text}");
 
+                var delay = _delayCalculator.Calculate(text, _options.Speed);
+
+                Logger.LogInformation($"Speed: {_options.Speed}, delay: {delay}");
+
                 var parts = text.Split(' ');
                 foreach (var part in parts)
                 {
                     foreach (var c in part)
                     {
                         input.SendKeys($"{c}");
-                        Thread.Sleep(TimeSpan.FromMilliseconds(_options.Delay));
+                        Thread.Sleep(TimeSpan.FromMilliseconds(delay));
                     }
 
                     var csssAttribute = input.GetAttribute("class");
@@ -133,7 +143,7 @@ namespace Klavogonki.Core.Strategies
                     }
 
                     input.SendKeys(" ");
-                    Thread.Sleep(TimeSpan.FromMilliseconds(_options.Delay * 2));
+                    Thread.Sleep(TimeSpan.FromMilliseconds(delay));
                 }
 
                 return true;
@@ -164,7 +174,7 @@ namespace Klavogonki.Core.Strategies
                 {
                     Logger.LogInformation($"Game will start in {waitingTime}");
 
-                    return waitingTime;
+                    return waitingTime.Add(TimeSpan.FromSeconds(30));
                 }
             }
 

@@ -9,9 +9,9 @@ namespace Klavogonki.Core.Options
     public class GameOptions
     {
         /// <summary>
-        /// Delay in milliseconds between keyboard inputs
+        /// Input speed in symbol per minyte
         /// </summary>
-        public int Delay { get; set; }
+        public int Speed { get; set; }
     }
 
     /// <summary>
