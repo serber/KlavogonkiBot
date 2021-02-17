@@ -2,9 +2,7 @@
 using System.Threading;
 using Klavogonki.Common;
 using Klavogonki.Common.Auth;
-using Klavogonki.Core.Options;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 
@@ -16,9 +14,11 @@ namespace Klavogonki.Core.Strategies
     /// </summary>
     public class CompetitionGameStrategy : BaseGameStrategy
     {
-        public CompetitionGameStrategy(IWebDriver webDriver, ITextExtractor textExtractor, IDelayCalculator delayCalculator,
-            IAuthenticationService authenticationService, IOptions<GameOptions> options,
-            ILogger<CompetitionGameStrategy> logger) : base(webDriver, authenticationService, textExtractor, delayCalculator, options, logger)
+        public CompetitionGameStrategy(IWebDriver webDriver, ITextExtractor textExtractor,
+            IInputMapBuilder inputMapBuilder,
+            IAuthenticationService authenticationService,
+            ILogger<CompetitionGameStrategy> logger) : base(webDriver, authenticationService, textExtractor,
+            inputMapBuilder, logger)
         {
         }
 

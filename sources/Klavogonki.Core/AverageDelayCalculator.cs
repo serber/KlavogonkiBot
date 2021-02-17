@@ -6,11 +6,10 @@ namespace Klavogonki.Core
     public class AverageDelayCalculator : IDelayCalculator
     {
         /// <inheritdoc cref="IDelayCalculator.Calculate"/>
-        public int Calculate(string text, int speed)
+        public int Calculate(int speed)
         {
             var delay = 60000 / speed;
-
-            return delay;
+            return delay - (delay * 30) / 100;
         }
     }
 }

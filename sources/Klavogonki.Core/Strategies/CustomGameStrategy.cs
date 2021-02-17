@@ -17,9 +17,11 @@ namespace Klavogonki.Core.Strategies
     {
         private readonly CustomGameOptions _customGameOptions;
 
-        public CustomGameStrategy(IWebDriver webDriver, IAuthenticationService authenticationService, IDelayCalculator delayCalculator,
-            ITextExtractor textExtractor, IOptions<CustomGameOptions> customGameOptions, IOptions<GameOptions> options,
-            ILogger<CustomGameStrategy> logger) : base(webDriver, authenticationService, textExtractor, delayCalculator, options, logger)
+        public CustomGameStrategy(IWebDriver webDriver, IAuthenticationService authenticationService,
+            IInputMapBuilder inputMapBuilder,
+            ITextExtractor textExtractor, IOptions<CustomGameOptions> customGameOptions,
+            ILogger<CustomGameStrategy> logger) : base(webDriver, authenticationService, textExtractor, inputMapBuilder,
+            logger)
         {
             _customGameOptions = customGameOptions.Value;
         }

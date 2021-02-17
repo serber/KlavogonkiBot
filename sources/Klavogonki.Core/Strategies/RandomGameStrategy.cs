@@ -1,8 +1,6 @@
 ﻿using Klavogonki.Common;
 using Klavogonki.Common.Auth;
-using Klavogonki.Core.Options;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using OpenQA.Selenium;
 
 namespace Klavogonki.Core.Strategies
@@ -12,9 +10,9 @@ namespace Klavogonki.Core.Strategies
     /// </summary>
     public class RandomGameStrategy : BaseGameStrategy
     {
-        public RandomGameStrategy(IWebDriver webDriver, IAuthenticationService authenticationService, IDelayCalculator delayCalculator,
-            ITextExtractor textExtractor, IOptions<GameOptions> options, ILogger<RandomGameStrategy> logger)
-            : base(webDriver, authenticationService, textExtractor, delayCalculator, options, logger)
+        public RandomGameStrategy(IWebDriver webDriver, IAuthenticationService authenticationService, IInputMapBuilder inputMapBuilder,
+            ITextExtractor textExtractor, ILogger<RandomGameStrategy> logger)
+            : base(webDriver, authenticationService, textExtractor, inputMapBuilder, logger)
         {
         }
 

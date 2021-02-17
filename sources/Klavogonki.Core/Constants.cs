@@ -10,5 +10,7 @@
         internal const string RandomUrl = "https://klavogonki.ru/go?type=normal";
 
         internal const string CreateUrl = "https://klavogonki.ru/create";
+
+        internal const int DeviationPercent = 50;
     }
 }

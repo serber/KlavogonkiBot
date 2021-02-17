@@ -46,6 +46,8 @@ namespace Klavogonki.Core.Runner
             {
                 var gameStrategy = scope.ServiceProvider.GetService<IGameStrategy>();
 
+                _logger.LogInformation($"Selected strategy: {gameStrategy.GetType().Name}");
+
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     var success = gameStrategy.Play();

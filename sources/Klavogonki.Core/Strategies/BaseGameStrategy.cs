@@ -3,9 +3,7 @@ using System.Globalization;
 using System.Threading;
 using Klavogonki.Common;
 using Klavogonki.Common.Auth;
-using Klavogonki.Core.Options;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 
@@ -18,9 +16,7 @@ namespace Klavogonki.Core.Strategies
 
         private readonly ITextExtractor _textExtractor;
 
-        private readonly IDelayCalculator _delayCalculator;
-
-        private readonly GameOptions _options;
+        private readonly IInputMapBuilder _inputMapBuilder;
 
         protected readonly IWebDriver WebDriver;
 
@@ -28,13 +24,12 @@ namespace Klavogonki.Core.Strategies
 
         private bool _authenticated;
 
-        protected BaseGameStrategy(IWebDriver webDriver, IAuthenticationService authenticationService, ITextExtractor textExtractor, IDelayCalculator delayCalculator, IOptions<GameOptions> options, ILogger logger)
+        protected BaseGameStrategy(IWebDriver webDriver, IAuthenticationService authenticationService, ITextExtractor textExtractor, IInputMapBuilder inputMapBuilder, ILogger logger)
         {
             _authenticationService = authenticationService;
             _textExtractor = textExtractor;
-            _delayCalculator = delayCalculator;
-            _options = options.Value;
-
+            _inputMapBuilder = inputMapBuilder;
+            
             WebDriver = webDriver;
             Logger = logger;
 
@@ -44,22 +39,31 @@ namespace Klavogonki.Core.Strategies
         /// <inheritdoc cref="IGameStrategy"/>
         public bool Play()
         {
-            if (!_authenticated)
+            try
             {
-                Authenticate();
+                if (!_authenticated)
+                {
+                    Authenticate();
+                }
+
+                Logger.LogInformation("Starting game");
+
+                StartGame();
+
+                Logger.LogInformation("Waiting for game");
+
+                WaitGame();
+
+                Logger.LogInformation("Game started");
+
+                return PlayGame();
             }
+            catch (Exception e)
+            {
+                Logger.LogError(e, e.Message);
 
-            Logger.LogInformation("Starting game");
-
-            StartGame();
-
-            Logger.LogInformation("Waiting for game");
-
-            WaitGame();
-
-            Logger.LogInformation("Game started");
-
-            return PlayGame();
+                return false;
+            }
         }
 
         /// <inheritdoc cref="IDisposable.Dispose"/>
@@ -121,42 +125,45 @@ namespace Klavogonki.Core.Strategies
 
                 Logger.LogInformation($"Text found: {text}");
 
-                var delay = _delayCalculator.Calculate(text, _options.Speed);
-
-                Logger.LogInformation($"Speed: {_options.Speed}, delay: {delay}");
-
-                var parts = text.Split(' ');
-                foreach (var part in parts)
+                var inputMaps = _inputMapBuilder.GetInputMaps(text);
+                
+                foreach (var entry in inputMaps)
                 {
-                    foreach (var c in part)
+                    if (entry.ErrorSymbols.Length > 0)
                     {
-                        input.SendKeys($"{c}");
-                        Thread.Sleep(TimeSpan.FromMilliseconds(delay));
+                        foreach (var errorSymbol in entry.ErrorSymbols)
+                        {
+                            input.SendKeys($"{errorSymbol}");
+                            Thread.Sleep(entry.Delay);
+                        }
+
+                        for (var i = 0; i < entry.ErrorSymbols.Length; i++)
+                        {
+                            input.SendKeys(Keys.Backspace);
+                        }
+
+                        Thread.Sleep(entry.Delay);
                     }
+
+                    input.SendKeys($"{entry.Symbol}");
+                    Thread.Sleep(entry.Delay);
 
                     var csssAttribute = input.GetAttribute("class");
                     if (csssAttribute != null && csssAttribute.Contains("error"))
                     {
-                        Logger.LogError("Error found");
+                        Logger.LogError("Error in input found");
 
                         return false;
                     }
-
-                    input.SendKeys(" ");
-                    Thread.Sleep(TimeSpan.FromMilliseconds(delay));
                 }
 
+                Thread.Sleep(TimeSpan.FromSeconds(5));
+                
                 return true;
             }
             catch (ElementNotInteractableException)
             {
                 return true;
-            }
-            catch (Exception e)
-            {
-                Logger.LogError(e, e.Message);
-
-                return false;
             }
         }
 
@@ -172,7 +179,7 @@ namespace Klavogonki.Core.Strategies
                 var text = waitingTimeout.Text;
                 if (TimeSpan.TryParse($"00:{text.Replace(" ", ":")}", new DateTimeFormatInfo(), out var waitingTime))
                 {
-                    Logger.LogInformation($"Game will start in {waitingTime}");
+                    Logger.LogInformation($"Game will start in {waitingTime} at {DateTime.Now.Add(waitingTime)}");
 
                     return waitingTime.Add(TimeSpan.FromSeconds(30));
                 }

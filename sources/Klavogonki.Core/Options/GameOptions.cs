@@ -12,6 +12,11 @@ namespace Klavogonki.Core.Options
         /// Input speed in symbol per minyte
         /// </summary>
         public int Speed { get; set; }
+
+        /// <summary>
+        /// Input error percent
+        /// </summary>
+        public int ErrorPercent { get; set; }
     }
 
     /// <summary>
