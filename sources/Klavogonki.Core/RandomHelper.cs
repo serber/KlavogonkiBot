@@ -20,7 +20,7 @@ namespace Klavogonki.Core
 
         internal static bool IsLucky(int percent)
         {
-            var random = Random.Next(0, 100);
+            var random = Random.Next(1, 100);
             return random <= percent;
         }
     }
